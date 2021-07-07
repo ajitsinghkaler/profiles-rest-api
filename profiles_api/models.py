@@ -2,8 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
+from django.conf import settings
 
 # Create your models here.
+
 
 class UserProfileManager(BaseUserManager):
     """Manager for user profiles"""
@@ -30,19 +32,20 @@ class UserProfileManager(BaseUserManager):
         user.save(using=self._db)
 
         return user
-        
+
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
     """Databse model for users in the system"""
+
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
-    
+
     objects = UserProfileManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["name"]
 
     def get_full_name(self):
         """Retrieve full name of user"""
@@ -50,9 +53,20 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         """Retrieve short  name of user"""
-        return self.name 
+        return self.name
 
     def __str__(self):
         """Return string representation of our user"""
         return self.email
 
+
+class ProfileFeedItem(models.Model):
+    """Profile status update"""
+
+    user_profile = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status_text = models.CharField(max_length=255)
+    created_on = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        """Return model as a string"""
+        return self.status_text
